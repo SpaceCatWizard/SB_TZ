@@ -1,0 +1,47 @@
+- hosts: 127.0.0.1
+  connection: local
+
+
+  tasks:
+            - name: Install requirements
+              apt:
+                    pkg:
+                          - gnupg
+                          - software-properties-common
+                          - curl
+                          - unzip
+                          - git
+                    state: present
+                    update_cache: true
+
+
+            - name: Add the HashiCorp GPG key.
+              shell: curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+              args:
+                executable: /bin/bash
+
+            - name: Add the official HashiCorp Linux repository
+              shell: sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+              args:
+                executable: /bin/bash
+
+            - name: Install terraform
+              apt:
+                    pkg: terraform
+                    state: present
+                    update_cache: true
+
+            - name: Downlaod AWS
+              shell: curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+
+            - name: Unzip AWS CLI
+              shell: unzip awscliv2.zip -d /tmp/
+              args:
+                executable: /bin/bash
+
+
+            - name: Install AWS CLI
+              shell: /tmp/aws/install
+              args:
+                executable: /bin/bash
+

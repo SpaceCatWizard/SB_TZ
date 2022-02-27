@@ -1,0 +1,47 @@
+- hosts: 127.0.0.1
+  connection: local
+
+
+  tasks:
+
+            - name: Init terraform config
+              shell: terraform init
+              args:
+                executable: /bin/bash
+
+            - name: Apply terraform config
+              shell: terraform apply --auto-approve 
+              args:
+                executable: /bin/bash
+
+            - name: Extract private ssh key
+              shell: terraform show -json | jq -r '.values.root_module.resources[].values | select(.private_key_pem) |.private_key_pem' > ./terraform_private_key.pem
+              args:
+                executable: /bin/bash
+
+            - name: Change key permission
+              shell: chmod 400 terraform_private_key.pem
+              args:
+                executable: /bin/bash
+
+            - name: Install nginx on remote server
+              retries: 10
+              delay: 10
+              shell: ssh -o "StrictHostKeyChecking no" -i terraform_private_key.pem ubuntu@$(terraform show -json | jq -r '.values.outputs.public_instance_dns.value') "sudo apt install nginx -y"
+              args:
+                executable: /bin/bash
+
+            - name: Copy test.txt to Web-server
+              shell: scp -i terraform_private_key.pem test.txt ubuntu@$(terraform show -json | jq -r '.values.outputs.public_instance_dns.value'):/home/ubuntu/test.txt
+              args:
+                executable: /bin/bash
+
+            - name: Move test.txt to www folder
+              shell: ssh -i terraform_private_key.pem ubuntu@$(terraform show -json | jq -r '.values.outputs.public_instance_dns.value') "sudo cp /home/ubuntu/test.txt /var/www/html/test.txt"
+              args:
+                executable: /bin/bash
+
+            - name: DONE
+              shell: echo http://$(terraform show -json | jq -r '.values.outputs.public_instance_dns.value')/test.txt
+              args:
+                executable: /bin/bash
