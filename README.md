@@ -7,15 +7,15 @@
 P.S.
 Запускалось и тестировалось на Ubuntu LTS 20.04
 
-# Для установки terraform и aws необходимо запустить ansible сценарий install_terraform.yml
+## Для установки terraform и aws необходимо запустить ansible сценарий install_terraform.yml
 ```
 ansible-playbook install_terraform.yml
 ```
-# Перед запуском сценария развертки необходимо ввести доступы авторизации Amazon Web Services
+## Перед запуском сценария развертки необходимо ввести доступы авторизации Amazon Web Services
 ```
 aws configure
 ```
-# Для запуска сценария развертки web-server необходимо запустить deploy.yml
+## Для запуска сценария развертки web-server необходимо запустить deploy.yml
 ```
 ansible-playbook -v deploy.yml
 ```
@@ -24,4 +24,12 @@ ansible-playbook -v deploy.yml
 Узнать DNS можно при помощи команды:
 ```
 terraform output public_instance_dns
+```
+
+
+## Dockerfile находится по пути .\docker\Dockerfile в нем описан web-server с раздачей файла test.txt (в процессе сборки, этот файл помещается внутрь конейнера)
+```
+cd ./docker
+docker build -t webserver:1 .
+docker run -p 80:80 webserver:1
 ```
